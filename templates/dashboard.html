@@ -1,0 +1,449 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — The Lot Scout{% endblock %}
+
+{% block head %}
+<style>
+  .dash-wrap { max-width: 860px; margin: 0 auto; padding: 40px 20px 80px; }
+
+  /* Header */
+  .dash-header {
+    background: var(--navy);
+    padding: 32px 36px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .dash-header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    color: #fff;
+    letter-spacing: 1px;
+  }
+  .dash-header p { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #a0aabf; margin-top: 4px; }
+  .tier-pill {
+    background: var(--tan);
+    color: var(--navy);
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 2px;
+    padding: 6px 16px;
+    font-weight: 600;
+  }
+
+  /* Upgrade banner */
+  .upgrade-banner {
+    background: #fff8e8;
+    border: 1px solid var(--tan);
+    border-left: 4px solid var(--tan);
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .upgrade-banner p { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--ink); }
+  .upgrade-btn {
+    background: var(--tan);
+    color: var(--navy);
+    border: none;
+    padding: 8px 20px;
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .upgrade-btn:hover { background: var(--tan2); }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    color: var(--navy);
+    letter-spacing: 1px;
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--tan);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .kw-count-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* Add keyword */
+  .add-kw-row { display: flex; gap: 0; margin-bottom: 16px; }
+  .add-kw-input {
+    flex: 1;
+    border: 1px solid var(--line);
+    border-right: none;
+    background: var(--bg);
+    padding: 10px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color .15s;
+  }
+  .add-kw-input:focus { border-color: var(--tan); background: #fff; }
+  .add-kw-input::placeholder { color: var(--muted); }
+  .add-kw-btn {
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s;
+  }
+  .add-kw-btn:hover { background: var(--navy2); }
+
+  .kw-tip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .kw-tip strong { color: var(--ink); }
+
+  /* Keyword chips */
+  .kw-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 44px;
+  }
+  .kw-chip {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    padding: 6px 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .kw-remove {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    transition: color .12s;
+  }
+  .kw-remove:hover { color: var(--red); }
+  .kw-empty {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    padding: 8px 0;
+  }
+
+  /* Error/success messages */
+  .msg {
+    padding: 10px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    margin-bottom: 14px;
+    display: none;
+  }
+  .msg.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+  .msg.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+  .msg.show { display: block; }
+
+  /* Subscription info */
+  .sub-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .sub-stat {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    padding: 16px;
+    text-align: center;
+  }
+  .sub-stat .num {
+    font-family: 'Cinzel', serif;
+    font-size: 22px;
+    color: var(--navy);
+    font-weight: 700;
+  }
+  .sub-stat .lbl {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .danger-zone { border-color: #f5c6cb; }
+  .danger-title { color: var(--red) !important; border-bottom-color: var(--red) !important; }
+  .cancel-btn {
+    background: transparent;
+    border: 1.5px solid var(--red);
+    color: var(--red);
+    padding: 9px 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .cancel-btn:hover { background: var(--red); color: #fff; }
+
+  /* Cancel modal */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-top: 4px solid var(--tan);
+    max-width: 440px;
+    width: 100%;
+    padding: 32px 28px;
+    text-align: center;
+  }
+  .modal-box h3 { font-family: 'Cinzel', serif; font-size: 18px; color: var(--navy); margin-bottom: 12px; }
+  .modal-box p { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+  .modal-btns { display: flex; flex-direction: column; gap: 10px; }
+  .modal-btn { padding: 11px; font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 1px; cursor: pointer; border: none; transition: all .15s; }
+  .modal-btn.std { background: var(--tan); color: var(--navy); font-weight: 600; }
+  .modal-btn.std:hover { background: var(--tan2); }
+  .modal-btn.str { background: transparent; border: 1.5px solid var(--navy); color: var(--navy); }
+  .modal-btn.str:hover { background: var(--navy); color: #fff; }
+  .modal-btn.cancel { background: transparent; color: var(--muted); font-size: 11px; }
+  .modal-btn.cancel:hover { color: var(--ink); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dash-wrap">
+
+  <!-- Header -->
+  <div class="dash-header">
+    <div>
+      <h1>Your Dashboard</h1>
+      <p>{{ session.get('email') }}</p>
+    </div>
+    <span class="tier-pill">{{ tier.upper() }} PLAN</span>
+  </div>
+
+  <!-- Upgrade banner for non-pro -->
+  {% if upgrade or tier != 'pro' %}
+  <div class="upgrade-banner">
+    <p>
+      {% if tier == 'starter' %}Upgrade to Standard for 20 keywords and 2x daily sweeps — or go Pro for unlimited everything.
+      {% elif tier == 'standard' %}Upgrade to Pro for unlimited keywords, 3x daily sweeps, and Lot Hunter dashboard access.
+      {% else %}You have full Pro access. ✓{% endif %}
+    </p>
+    {% if tier != 'pro' %}
+      <a href="/signup?tier=pro" class="upgrade-btn">Upgrade to Pro</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Subscription stats -->
+  <div class="card">
+    <div class="card-title">Your Subscription</div>
+    <div class="sub-grid">
+      <div class="sub-stat">
+        <div class="num">{{ kw_count }}/{% if tier == 'pro' %}∞{% else %}{{ kw_limit }}{% endif %}</div>
+        <div class="lbl">Keywords Used</div>
+      </div>
+      <div class="sub-stat">
+        <div class="num">{% if tier == 'starter' %}1{% elif tier == 'standard' %}2{% else %}3{% endif %}×</div>
+        <div class="lbl">Daily Sweeps</div>
+      </div>
+      <div class="sub-stat">
+        <div class="num">{% if tier == 'pro' %}✓{% else %}✕{% endif %}</div>
+        <div class="lbl">Lot Hunter</div>
+      </div>
+      <div class="sub-stat">
+        <div class="num">${% if tier == 'starter' %}1.99{% elif tier == 'standard' %}3.99{% else %}9.99{% endif %}</div>
+        <div class="lbl">Per Month</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Keywords -->
+  <div class="card">
+    <div class="card-title">
+      Your Keywords
+      <span class="kw-count-badge">{{ kw_count }} saved</span>
+    </div>
+
+    <div class="kw-tip">
+      💡 <strong>Tip:</strong> Specific keywords get the best results.
+      Try <em>"1952 Topps Mickey Mantle"</em> instead of <em>"baseball cards"</em>,
+      or <em>"Edo period katana"</em> instead of <em>"sword"</em>.
+    </div>
+
+    <div class="add-kw-row">
+      <input class="add-kw-input" id="kwInput" placeholder="e.g. katana, Morgan silver dollar, 1952 Topps Mickey Mantle..." onkeydown="if(event.key==='Enter') addKeyword()">
+      <button class="add-kw-btn" onclick="addKeyword()">+ Add</button>
+    </div>
+
+    <div class="msg error" id="kwError"></div>
+    <div class="msg success" id="kwSuccess"></div>
+
+    <div class="kw-grid" id="kwGrid">
+      {% if keywords %}
+        {% for kw in keywords %}
+          <div class="kw-chip" id="chip-{{ loop.index }}">
+            {{ kw }}
+            <button class="kw-remove" onclick="removeKeyword('{{ kw }}')" title="Remove">✕</button>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="kw-empty" id="kwEmpty">No keywords yet — add your first one above</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Lot Hunter (Pro only) -->
+  {% if tier == 'pro' %}
+  <div class="card">
+    <div class="card-title">Lot Hunter Dashboard</div>
+    <p style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6;">
+      Search all verified auction sites instantly with one click. Results appear right on the page — no popup blockers, no tab blasting.
+    </p>
+    <a href="/hunter" style="background:var(--navy);color:#fff;text-decoration:none;padding:10px 24px;font-family:'Cinzel',serif;font-size:13px;letter-spacing:1px;display:inline-block;">
+      Open Lot Hunter →
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- Cancel/Downgrade -->
+  <div class="card danger-zone">
+    <div class="card-title danger-title">Manage Subscription</div>
+    <p style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6;">
+      Need to make changes to your plan? You can cancel or downgrade at any time. Your access continues until the end of your billing period.
+    </p>
+    <button class="cancel-btn" onclick="showCancelModal()">Cancel or Downgrade</button>
+  </div>
+
+</div>
+
+<!-- Cancel Modal -->
+<div class="modal-overlay" id="cancelModal">
+  <div class="modal-box">
+    <h3>Are You Sure?</h3>
+    <p>Before you cancel — would you like to downgrade to a lower tier instead? You'll keep access and save money every month.</p>
+    <div class="modal-btns">
+      <button class="modal-btn std" onclick="closeModal()">Downgrade to Standard — $3.99/mo</button>
+      <button class="modal-btn str" onclick="closeModal()">Downgrade to Starter — $1.99/mo</button>
+      <button class="modal-btn cancel" onclick="closeModal()">No thanks, cancel my subscription</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var keywords = {{ keywords | tojson }};
+
+function showMsg(id, msg) {
+  document.getElementById(id).textContent = msg;
+  document.getElementById(id).classList.add('show');
+  setTimeout(() => document.getElementById(id).classList.remove('show'), 4000);
+}
+
+function renderGrid() {
+  var grid = document.getElementById('kwGrid');
+  var empty = document.getElementById('kwEmpty');
+  if (keywords.length === 0) {
+    grid.innerHTML = '<div class="kw-empty" id="kwEmpty">No keywords yet — add your first one above</div>';
+    return;
+  }
+  grid.innerHTML = keywords.map(function(kw) {
+    return '<div class="kw-chip"><span>' + kw + '</span><button class="kw-remove" onclick="removeKeyword(\'' + kw.replace(/'/g, "\\'") + '\')" title="Remove">✕</button></div>';
+  }).join('');
+}
+
+function addKeyword() {
+  var input = document.getElementById('kwInput');
+  var kw = input.value.trim().toLowerCase();
+  if (!kw) return;
+
+  fetch('/keywords/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ keyword: kw })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.error) {
+      showMsg('kwError', data.error);
+    } else {
+      keywords = data.keywords;
+      renderGrid();
+      input.value = '';
+      showMsg('kwSuccess', '✓ "' + kw + '" added to your keywords');
+    }
+  })
+  .catch(() => showMsg('kwError', 'Something went wrong. Please try again.'));
+}
+
+function removeKeyword(kw) {
+  fetch('/keywords/delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ keyword: kw })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      keywords = data.keywords;
+      renderGrid();
+      showMsg('kwSuccess', '"' + kw + '" removed');
+    }
+  })
+  .catch(() => showMsg('kwError', 'Something went wrong. Please try again.'));
+}
+
+function showCancelModal() {
+  document.getElementById('cancelModal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('cancelModal').classList.remove('show');
+}
+
+document.getElementById('cancelModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+{% endblock %}

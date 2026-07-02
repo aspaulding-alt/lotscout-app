@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Lot Scout — Never Miss an Auction Listing Again</title>
+<meta name="description" content="Search verified auction sites automatically. Get alerted the moment something you want is listed — anywhere online.">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1e2535;
+    --navy2: #262e42;
+    --navy3: #2e3850;
+    --tan: #c9a87a;
+    --tan2: #e0c79f;
+    --bg: #e8e4de;
+    --ink: #2c2c2c;
+    --muted: #6b6b63;
+    --line: #d4cfc8;
+    --card: #ffffff;
+    --green: #2a6b3c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--ink); font-family: Georgia, serif; font-size: 16px; line-height: 1.6; }
+
+  /* ── Nav ─────────────────────────────────────────────── */
+  nav {
+    background: var(--navy);
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .nav-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 17px;
+    color: var(--tan2);
+    letter-spacing: 2px;
+    font-weight: 600;
+  }
+  .nav-the {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--tan);
+    display: block;
+    line-height: 1;
+  }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: #a0aabf;
+    text-decoration: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: .5px;
+    transition: color .15s;
+  }
+  .nav-links a:hover { color: var(--tan2); }
+  .nav-cta {
+    background: var(--tan) !important;
+    color: var(--navy) !important;
+    padding: 8px 18px !important;
+    font-family: 'Cinzel', serif !important;
+    font-size: 12px !important;
+    letter-spacing: 1px !important;
+    font-weight: 600 !important;
+    transition: background .15s !important;
+  }
+  .nav-cta:hover { background: var(--tan2) !important; }
+
+  /* ── Hero ────────────────────────────────────────────── */
+  .hero {
+    background: var(--navy);
+    padding: 100px 40px 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 42px, rgba(201,168,122,0.04) 42px, rgba(201,168,122,0.04) 43px),
+      repeating-linear-gradient(90deg, transparent, transparent 42px, rgba(201,168,122,0.04) 42px, rgba(201,168,122,0.04) 43px);
+    pointer-events: none;
+  }
+  .hero-inner { position: relative; z-index: 1; max-width: 760px; margin: 0 auto; }
+  .hero-icon { display: flex; justify-content: center; margin-bottom: 20px; }
+  .hero-badge {
+    display: inline-block;
+    background: rgba(201,168,122,0.12);
+    border: 1px solid var(--tan);
+    color: var(--tan2);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    margin-bottom: 22px;
+  }
+  .hero h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(30px, 5vw, 54px);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.15;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+  }
+  .hero h1 span { color: var(--tan2); }
+  .hero p {
+    font-size: 17px;
+    color: #a0aabf;
+    max-width: 580px;
+    margin: 0 auto 36px;
+    line-height: 1.7;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .hero-btns {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 50px;
+  }
+  .btn-primary {
+    background: var(--tan);
+    color: var(--navy);
+    border: none;
+    padding: 15px 36px;
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background .15s;
+  }
+  .btn-primary:hover { background: var(--tan2); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--tan2);
+    border: 1.5px solid var(--tan);
+    padding: 15px 36px;
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: all .15s;
+  }
+  .btn-secondary:hover { background: rgba(201,168,122,0.1); }
+
+  .hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    flex-wrap: wrap;
+    border-top: 1px solid rgba(201,168,122,0.2);
+    padding-top: 36px;
+  }
+  .stat { text-align: center; }
+  .stat .num {
+    font-family: 'Cinzel', serif;
+    font-size: 26px;
+    color: var(--tan2);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .stat .lbl {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  /* ── Demo ────────────────────────────────────────────── */
+  .demo {
+    background: var(--navy2);
+    padding: 80px 40px;
+    text-align: center;
+  }
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--tan);
+    margin-bottom: 10px;
+  }
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(22px, 3vw, 32px);
+    color: #fff;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+  .section-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+    color: #a0aabf;
+    max-width: 500px;
+    margin: 0 auto 40px;
+    line-height: 1.7;
+  }
+  .demo-frame {
+    max-width: 760px;
+    margin: 0 auto;
+    background: var(--navy);
+    border: 1px solid rgba(201,168,122,0.3);
+    aspect-ratio: 16/9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    cursor: pointer;
+    transition: border-color .2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .demo-frame:hover { border-color: var(--tan); }
+  .demo-frame::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(0deg, transparent, transparent 42px, rgba(201,168,122,0.03) 42px, rgba(201,168,122,0.03) 43px);
+  }
+  .play-btn {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--tan);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 1;
+  }
+  .play-btn::after {
+    content: '';
+    border-style: solid;
+    border-width: 12px 0 12px 22px;
+    border-color: transparent transparent transparent var(--navy);
+    margin-left: 4px;
+  }
+  .demo-frame p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: #a0aabf;
+    position: relative; z-index: 1;
+  }
+
+  /* ── How it works ────────────────────────────────────── */
+  .how { background: var(--bg); padding: 80px 40px; }
+  .how-inner { max-width: 1000px; margin: 0 auto; }
+  .how-header { text-align: center; margin-bottom: 56px; }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 28px;
+  }
+  .step {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--tan);
+    padding: 28px 24px;
+  }
+  .step-num {
+    font-family: 'Cinzel', serif;
+    font-size: 28px;
+    color: var(--tan);
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .step h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    color: var(--navy);
+    letter-spacing: .5px;
+    margin-bottom: 10px;
+  }
+  .step p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ── Features ────────────────────────────────────────── */
+  .features { background: var(--navy); padding: 80px 40px; }
+  .features-inner { max-width: 1000px; margin: 0 auto; }
+  .features-header { text-align: center; margin-bottom: 52px; }
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .feature-card {
+    background: var(--navy2);
+    border: 1px solid rgba(201,168,122,0.2);
+    padding: 24px 22px;
+    transition: border-color .15s;
+  }
+  .feature-card:hover { border-color: var(--tan); }
+  .feature-icon { font-size: 22px; margin-bottom: 12px; }
+  .feature-card h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    color: var(--tan2);
+    letter-spacing: .5px;
+    margin-bottom: 8px;
+  }
+  .feature-card p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: #8891a8;
+    line-height: 1.7;
+  }
+
+  /* ── Pricing ─────────────────────────────────────────── */
+  .pricing { background: var(--bg); padding: 80px 40px; }
+  .pricing-inner { max-width: 900px; margin: 0 auto; }
+  .pricing-header { text-align: center; margin-bottom: 52px; }
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    align-items: start;
+  }
+  .price-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    padding: 28px 22px;
+    position: relative;
+  }
+  .price-card.featured {
+    border: 2px solid var(--tan);
+    transform: translateY(-6px);
+  }
+  .popular-tag {
+    position: absolute;
+    top: -12px; left: 50%; transform: translateX(-50%);
+    background: var(--tan);
+    color: var(--navy);
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 3px 14px;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .price-tier {
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    color: var(--navy);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .price-amount {
+    font-family: 'Cinzel', serif;
+    font-size: 32px;
+    color: var(--navy);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .price-amount span { font-size: 15px; font-weight: 400; color: var(--muted); }
+  .price-desc {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    line-height: 1.5;
+    min-height: 40px;
+  }
+  .price-features {
+    list-style: none;
+    margin-bottom: 24px;
+  }
+  .price-features li {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink);
+    padding: 5px 0;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .price-features li::before { content: '✓'; color: var(--green); font-size: 11px; flex-shrink: 0; }
+  .price-features li.no::before { content: '✕'; color: #ccc; }
+  .price-features li.no { color: #ccc; }
+  .price-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 11px;
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: all .15s;
+  }
+  .price-btn.outline { background: transparent; border: 1.5px solid var(--navy); color: var(--navy); }
+  .price-btn.outline:hover { background: var(--navy); color: #fff; }
+  .price-btn.fill { background: var(--tan); color: var(--navy); font-weight: 600; }
+  .price-btn.fill:hover { background: var(--tan2); }
+  .trial-note {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+
+  /* ── Cancel modal ────────────────────────────────────── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-top: 4px solid var(--tan);
+    max-width: 440px;
+    width: 100%;
+    padding: 32px 28px;
+    text-align: center;
+  }
+  .modal-box h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    color: var(--navy);
+    margin-bottom: 12px;
+  }
+  .modal-box p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+  .modal-btns { display: flex; flex-direction: column; gap: 10px; }
+  .modal-btn {
+    padding: 11px;
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border: none;
+    transition: all .15s;
+  }
+  .modal-btn.downgrade-std { background: var(--tan); color: var(--navy); font-weight: 600; }
+  .modal-btn.downgrade-std:hover { background: var(--tan2); }
+  .modal-btn.downgrade-str { background: transparent; border: 1.5px solid var(--navy); color: var(--navy); }
+  .modal-btn.downgrade-str:hover { background: var(--navy); color: #fff; }
+  .modal-btn.cancel-btn { background: transparent; color: var(--muted); font-size: 11px; }
+  .modal-btn.cancel-btn:hover { color: var(--ink); }
+
+  /* ── CTA ─────────────────────────────────────────────── */
+  .cta-banner { background: var(--navy); padding: 80px 40px; text-align: center; }
+  .cta-banner h2 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(22px, 3vw, 36px);
+    color: #fff;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+  .cta-banner p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+    color: #a0aabf;
+    max-width: 480px;
+    margin: 0 auto 32px;
+    line-height: 1.7;
+  }
+  .signup-row {
+    display: flex;
+    gap: 0;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+  .signup-input {
+    flex: 1;
+    background: var(--navy2);
+    border: 1px solid var(--tan);
+    border-right: none;
+    color: #fff;
+    padding: 13px 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    outline: none;
+  }
+  .signup-input::placeholder { color: #5a6480; }
+  .signup-btn {
+    background: var(--tan);
+    color: var(--navy);
+    border: none;
+    padding: 13px 24px;
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s;
+  }
+  .signup-btn:hover { background: var(--tan2); }
+  .signup-note {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #5a6480;
+    margin-top: 10px;
+  }
+
+  /* ── Footer ──────────────────────────────────────────── */
+  footer {
+    background: var(--navy2);
+    padding: 36px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    border-top: 1px solid rgba(201,168,122,0.15);
+  }
+  .footer-brand {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    color: var(--tan2);
+    letter-spacing: 2px;
+  }
+  .footer-links {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+    flex-wrap: wrap;
+  }
+  .footer-links a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #5a6480;
+    text-decoration: none;
+    transition: color .15s;
+  }
+  .footer-links a:hover { color: var(--tan2); }
+  .footer-copy {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #3a4258;
+    width: 100%;
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  @media (max-width: 640px) {
+    nav { padding: 0 20px; }
+    .nav-links { display: none; }
+    .hero { padding: 70px 20px 60px; }
+    .demo, .how, .features, .pricing, .cta-banner { padding: 60px 20px; }
+    .hero-stats { gap: 28px; }
+    .signup-row { flex-direction: column; }
+    .signup-input { border-right: 1px solid var(--tan); border-bottom: none; }
+    footer { padding: 28px 20px; flex-direction: column; align-items: center; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <a class="nav-brand" href="#">
+    <div>
+      <span class="nav-the">The</span>
+      <span class="nav-logo">Lot Scout</span>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="/login" style="color:#a0aabf;text-decoration:none;font-family:IBM Plex Mono,monospace;font-size:12px;">Sign In</a></li>
+    <li><a href="/signup?tier=pro" class="nav-cta">Start Free Trial</a></li>
+  </ul>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-icon">
+      <svg width="42" height="42" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="46" stroke="#c9a87a" stroke-width="5"/>
+        <circle cx="50" cy="50" r="30" stroke="#c9a87a" stroke-width="5"/>
+        <circle cx="50" cy="50" r="14" stroke="#c9a87a" stroke-width="5"/>
+        <circle cx="50" cy="50" r="4" fill="#e0c79f"/>
+        <line x1="50" y1="0" x2="50" y2="10" stroke="#e0c79f" stroke-width="4"/>
+        <line x1="50" y1="90" x2="50" y2="100" stroke="#e0c79f" stroke-width="4"/>
+        <line x1="0" y1="50" x2="10" y2="50" stroke="#e0c79f" stroke-width="4"/>
+        <line x1="90" y1="50" x2="100" y2="50" stroke="#e0c79f" stroke-width="4"/>
+      </svg>
+    </div>
+    <div class="hero-badge">Auction Intelligence Platform</div>
+    <h1>Never Miss an Auction<br><span>Listing Again</span></h1>
+    <p>Search verified auction sites automatically across HiBid, EstateSales, AuctionNinja, K-BID and many more. Get alerted the moment something you want is listed.</p>
+    <div class="hero-btns">
+      <a href="#demo" class="btn-primary">Watch How It Works</a>
+      <a href="/signup?tier=pro" class="btn-secondary">Start Free Trial</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="num">
+          <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right:4px;">
+            <circle cx="50" cy="50" r="46" stroke="#e0c79f" stroke-width="6"/>
+            <circle cx="50" cy="50" r="28" stroke="#e0c79f" stroke-width="6"/>
+            <circle cx="50" cy="50" r="10" stroke="#e0c79f" stroke-width="6"/>
+            <circle cx="50" cy="50" r="3" fill="#e0c79f"/>
+          </svg>
+        </div>
+        <div class="lbl">Verified Sites & Growing</div>
+      </div>
+      <div class="stat">
+        <div class="num">3×</div>
+        <div class="lbl">Daily Sweeps</div>
+      </div>
+      <div class="stat">
+        <div class="num">∞</div>
+        <div class="lbl">Keywords Tracked</div>
+      </div>
+      <div class="stat">
+        <div class="num">7</div>
+        <div class="lbl">Day Free Trial</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Demo -->
+<section class="demo" id="demo">
+  <div class="section-label">See It In Action</div>
+  <div class="section-title">How The Lot Scout Works</div>
+  <div class="section-sub">Watch how collectors and dealers use The Lot Scout to find listings before anyone else does.</div>
+  <div class="demo-frame" onclick="playDemo(this)">
+    <div class="play-btn"></div>
+    <p>Click to watch the demo — 2 minutes</p>
+  </div>
+</section>
+
+<!-- How it works -->
+<section class="how" id="how">
+  <div class="how-inner">
+    <div class="how-header">
+      <div class="section-label">Simple Setup</div>
+      <div class="section-title" style="color:var(--navy);">Three Steps to Never Miss a Listing</div>
+      <div class="section-sub" style="color:var(--muted);">Up and running in under two minutes.</div>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>Save Your Keywords</h3>
+        <p>Type exactly what you're looking for — a specific katana, a particular baseball card, a vintage clock. The more specific the better.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>We Search Automatically</h3>
+        <p>The Lot Scout sweeps verified auction sites multiple times daily on your behalf — HiBid, EstateSales, AuctionNinja, LiveAuctioneers, K-BID and many more.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>Get Alerted Instantly</h3>
+        <p>The moment a matching listing appears, you get an email with the title, price, and a direct link — before the bidding gets competitive.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <h3>Hunt Manually Too</h3>
+        <p>Use The Lot Hunter dashboard to search all verified sites at once with one click — no more opening dozens of tabs manually.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="features" id="features">
+  <div class="features-inner">
+    <div class="features-header">
+      <div class="section-label">What You Get</div>
+      <div class="section-title">Everything a Serious Buyer Needs</div>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <h3>Automated Sweeps</h3>
+        <p>Morning, midday, and evening sweeps run automatically. You never have to manually check a single site again.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Instant Email Alerts</h3>
+        <p>Results land in your inbox the moment they're found — complete with listing title, price, and a direct link to the item.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h3>The Lot Hunter</h3>
+        <p>Our manual search dashboard lets you hit all verified sites with a single keyword click — all in one place, no tabs to juggle.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏛</div>
+        <h3>Verified Sites & Growing</h3>
+        <p>HiBid, EstateSales.org, AuctionNinja, K-BID, CTBids, LiveAuctioneers, Invaluable, Proxibid and many more — all in one search. New sites added regularly.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <h3>Smart Deduplication</h3>
+        <p>Already seen a listing? We remember. You only get alerted about genuinely new finds — never the same item twice.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🛒</div>
+        <h3>Any Category, Any Item</h3>
+        <p>Works for antiques, coins, militaria, furniture, collectibles and more — if it's sold at auction we'll find it. Use specific keywords for best results.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section class="pricing" id="pricing">
+  <div class="pricing-inner">
+    <div class="pricing-header">
+      <div class="section-label">Simple Pricing</div>
+      <div class="section-title" style="color:var(--navy);">Start Your Free Trial Today</div>
+      <div class="section-sub" style="color:var(--muted);">No contracts. Cancel or downgrade anytime.</div>
+    </div>
+    <div class="pricing-grid">
+
+      <!-- Starter -->
+      <div class="price-card">
+        <div class="price-tier">Starter</div>
+        <div class="price-amount">$1.99<span>/mo</span></div>
+        <div class="price-desc">Perfect for focused hunters with a short keyword list</div>
+        <ul class="price-features">
+          <li>5 saved keywords</li>
+          <li>1x daily sweep</li>
+          <li>Email alerts</li>
+          <li class="no">Lot Hunter dashboard</li>
+        </ul>
+        <a href="/signup?tier=starter" class="price-btn outline">Get Started</a>
+      </div>
+
+      <!-- Standard -->
+      <div class="price-card featured">
+        <div class="popular-tag">Most Popular</div>
+        <div class="price-tier">Standard</div>
+        <div class="price-amount">$3.99<span>/mo</span></div>
+        <div class="price-desc">More keywords, more coverage, more finds every day</div>
+        <ul class="price-features">
+          <li>20 saved keywords</li>
+          <li>2x daily sweeps</li>
+          <li>Email alerts</li>
+          <li class="no">Lot Hunter dashboard</li>
+        </ul>
+        <a href="/signup?tier=pro" class="price-btn fill">Get Started</a>
+      </div>
+
+      <!-- Pro -->
+      <div class="price-card">
+        <div class="price-tier">Pro</div>
+        <div class="price-amount">$9.99<span>/mo</span></div>
+        <div class="price-desc">Unlimited everything — for serious collectors and dealers</div>
+        <ul class="price-features">
+          <li>Unlimited keywords</li>
+          <li>3x daily sweeps</li>
+          <li>Email alerts</li>
+          <li>Lot Hunter dashboard</li>
+        </ul>
+        <a href="/signup?tier=pro" class="price-btn outline" onclick="showTrialSignup(event)">Start Free Trial</a>
+        <div class="trial-note">7-day free trial · $9.99/month after<br>Cancel or downgrade anytime</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Cancel/Downgrade Modal -->
+<div class="modal-overlay" id="cancelModal">
+  <div class="modal-box">
+    <h3>Are You Sure?</h3>
+    <p>Before you cancel — would you like to downgrade to a lower tier instead? You'll keep access and save money.</p>
+    <div class="modal-btns">
+      <button class="modal-btn downgrade-std" onclick="closeModal()">Downgrade to Standard — $3.99/mo</button>
+      <button class="modal-btn downgrade-str" onclick="closeModal()">Downgrade to Starter — $1.99/mo</button>
+      <button class="modal-btn cancel-btn" onclick="closeModal()">No thanks, cancel my subscription</button>
+    </div>
+  </div>
+</div>
+
+<!-- CTA / Signup -->
+<section class="cta-banner" id="signup">
+  <h2>Start Finding Listings<br>Before Anyone Else</h2>
+  <p>Try it free for 7 days. Full Pro access from day one — unlimited keywords, 3x daily sweeps, and Lot Hunter dashboard.</p>
+  <form action="https://thelotscout.us14.list-manage.com/subscribe/post?u=fab5223302cf3727875b7a97c&amp;id=437409943a&amp;f_id=00e318e0f0" method="post" target="_blank" novalidate>
+    <div class="signup-row">
+      <input class="signup-input" type="email" name="EMAIL" placeholder="Enter your email address" required>
+      <div style="position:absolute;left:-5000px;" aria-hidden="true">
+        <input type="text" name="b_fab5223302cf3727875b7a97c_437409943a" tabindex="-1" value="">
+      </div>
+      <button class="signup-btn" type="submit">Start Free Trial</button>
+    </div>
+  </form>
+  <p class="signup-note">7-day free trial · $9.99/month after · Cancel or downgrade anytime</p>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-brand">The Lot Scout</div>
+  <ul class="footer-links">
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="/privacy">Privacy Policy</a></li>
+    <li><a href="/terms">Terms of Service</a></li>
+  </ul>
+  <div class="footer-copy">© 2026 The Lot Scout · thelotscout.com · All rights reserved</div>
+</footer>
+
+<script>
+function playDemo(el) {
+  // Replace with your real YouTube embed URL when ready
+  el.innerHTML = '<iframe width="100%" height="100%" src="https://www.youtube.com/embed/YOUR_VIDEO_ID?autoplay=1" frameborder="0" allow="autoplay; fullscreen" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;"></iframe>';
+  el.style.padding = '0';
+}
+
+function showTrialSignup(e) {
+  // Just scrolls to signup for now
+  // Will connect to Stripe checkout when backend is built
+}
+
+function showCancelModal() {
+  document.getElementById('cancelModal').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('cancelModal').classList.remove('show');
+}
+
+// Close modal on overlay click
+document.getElementById('cancelModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>

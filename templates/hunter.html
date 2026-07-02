@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+{% block title %}Lot Hunter — The Lot Scout{% endblock %}
+
+{% block head %}
+<style>
+  .hunter-wrap { max-width: 1000px; margin: 0 auto; padding: 32px 20px 80px; }
+
+  .hunter-header {
+    background: var(--navy);
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .hunter-header h1 { font-family: 'Cinzel', serif; font-size: 20px; color: #fff; letter-spacing: 2px; }
+  .hunter-header p { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #a0aabf; margin-top: 4px; }
+
+  .search-box {
+    background: var(--card);
+    border: 1px solid var(--line);
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .search-label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .search-row { display: flex; gap: 0; }
+  .search-input {
+    flex: 1;
+    border: 1px solid var(--tan);
+    border-right: none;
+    background: var(--bg);
+    padding: 11px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    color: var(--ink);
+    outline: none;
+  }
+  .search-input:focus { background: #fff; }
+  .search-btn {
+    background: var(--tan);
+    color: var(--navy);
+    border: none;
+    padding: 11px 28px;
+    font-family: 'Cinzel', serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s;
+  }
+  .search-btn:hover { background: var(--tan2); }
+
+  /* Results */
+  .results-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--navy);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .results-meta h2 { font-family: 'Cinzel', serif; font-size: 15px; color: var(--navy); letter-spacing: 1px; }
+  .results-count { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); }
+
+  .site-block { margin-bottom: 20px; }
+  .site-block-head {
+    background: var(--navy);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    margin-bottom: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  .site-block-head .dot { width: 6px; height: 6px; border-radius: 50%; background: #5fae7e; }
+
+  .result-row {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--tan);
+    padding: 13px 16px;
+    margin-bottom: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .result-info { flex: 1; min-width: 200px; }
+  .result-kw {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: #fff;
+    background: var(--navy);
+    padding: 2px 8px;
+    display: inline-block;
+    margin-bottom: 5px;
+  }
+  .result-desc { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--ink); }
+  .view-btn {
+    background: var(--card);
+    color: var(--navy);
+    border: 1.5px solid var(--navy);
+    padding: 7px 16px;
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 1px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: all .12s;
+    flex-shrink: 0;
+  }
+  .view-btn:hover { background: var(--navy); color: #fff; }
+  .view-btn.opened { border-color: var(--green); color: var(--green); background: #eef6ef; }
+
+  .popup-notice {
+    display: none;
+    background: #fff7e6;
+    border: 1px solid #e0c060;
+    color: #6b5418;
+    padding: 10px 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    margin-bottom: 16px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .popup-notice.show { display: flex; }
+  .popup-notice button {
+    background: #6b5418;
+    color: #fff;
+    border: none;
+    padding: 5px 12px;
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--muted);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+  }
+  .empty-state .icon { font-size: 32px; margin-bottom: 12px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hunter-wrap">
+
+  <div class="hunter-header">
+    <div>
+      <h1>Lot Hunter</h1>
+      <p>Search all verified sites instantly · results appear right here</p>
+    </div>
+    <a href="/dashboard" style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#a0aabf;text-decoration:none;">← Dashboard</a>
+  </div>
+
+  <div class="search-box">
+    <div class="search-label">Enter a keyword to search all verified sites</div>
+    <div class="search-row">
+      <input class="search-input" id="searchInput" placeholder="e.g. katana, 1952 Topps Mickey Mantle, Morgan silver dollar..." onkeydown="if(event.key==='Enter') runSearch()">
+      <button class="search-btn" onclick="runSearch()">Search All Sites</button>
+    </div>
+  </div>
+
+  <div class="popup-notice" id="popupNotice">
+    <span>A couple of tabs may have been blocked by your browser.</span>
+    <button onclick="retryBlocked()">Open blocked tabs</button>
+  </div>
+
+  <div id="resultsArea">
+    <div class="empty-state">
+      <div class="icon">🎯</div>
+      Enter a keyword above and click Search to see live results across all verified sites.
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var SITES = [
+  {n:"AuctionNinja",         s:"https://www.auctionninja.com/marketplace-items?keyword={K}&view=40"},
+  {n:"LiveAuctioneers",      s:"https://www.liveauctioneers.com/search/?keyword={K}&pageSize=120&sort=-publishDate&status=online"},
+  {n:"Invaluable",           s:"https://www.invaluable.com/search?sort=postDateDesc&query={K}&keyword={K}"},
+  {n:"Proxibid",             s:"https://www.proxibid.com/asp/SearchAdvanced_i.asp?searchTerm={K}&category=all+categories&sort=unixtimestamp&length=100&start=1"},
+  {n:"AuctionZip",           s:"https://www.auctionzip.com/search-results?query={K}&displayNum=180&sortValue=postDate,desc"},
+  {n:"Rust Belt Revival",    s:"https://www.bidrustbelt.com/Browse?FullTextQuery={K}&ViewStyle=grid&StatusFilter=active_only&SortFilterOptions=1"},
+  {n:"EstateSales.net",      s:"https://www.estatesales.net/search/{K}?searchType=2"},
+  {n:"EBTH",                 s:"https://www.ebth.com/browse?q={K}&sort=sale_starts_at_desc"},
+  {n:"EstateSales.org",      s:"https://estatesales.org/search?type=online-auctions&q={K}"},
+  {n:"CTBids",               s:"https://ctbids.com/view-more-items/{K}"},
+  {n:"HiBid",                s:"https://hibid.com/lots?q={K}&ipp=100&status=OPEN"},
+  {n:"ezDownsizing",         s:"https://bid.ezdownsizing.com/allitems/keyword_{K}"},
+  {n:"Estate360",            s:"https://bid.estate360.com/allitems/keyword_{K}"},
+  {n:"Busy Beever",          s:"https://auctions.busybeever.com/lots?search={K}&lots_range=upcoming"},
+  {n:"Scheerer McCulloch",   s:"https://scheerermcculloch.com/?s={K}"},
+  {n:"Great Finds Auctions", s:"https://greatfindsauction.com/Browse?FullTextQuery={K}"},
+  {n:"JD Estate Sales",      s:"https://bid.jdestatesales.com/allitems/keyword_{K}"},
+  {n:"Placer Auctions",      s:"https://placerauctions.com/Browse?FullTextQuery={K}"},
+  {n:"Modern Day Auctions",  s:"https://www.moderndaybids.com/site/search/modern-day-auctions?q={K}"},
+  {n:"Hurley Auctions",      s:"https://bidon.hurleyauctions.com/auctions?page=1&pageSize=100&search={K}&sort=null&formData%5Bsearch%5D={K}&currentDisplay=tile&websiteDisplay%5B0%5D=tile&canToggle=false"},
+  {n:"John Peck Auctions",   s:"https://bid.johnpeckauctions.com/auctions/search/lots?filters=text_search%3A{K}%7Cauction_completes_at%3A1"},
+  {n:"Girard Auction",       s:"https://www.girardbid.com/servlet/Search.do?status=live&status=offline&status=postponed&status=rescheduled&keyword={K}"},
+  {n:"Rocky Mtn Brokers",    s:"https://www.whitleyauction.com/auctions?page=1&pageSize=20&search={K}&sort=null&formData%5Bsearch%5D={K}&currentDisplay=box&websiteDisplay%5B0%5D=box&canToggle=false"},
+  {n:"Auction Ohio",         s:"https://www.auctionohio.com/search?search={K}"},
+  {n:"K-BID",                s:"https://www.k-bid.com/auction/search?search_phrase={K}"},
+  {n:"Brunks Online Auction",s:"https://bid.brunksonlineauction.com/ui/items?query={K}"},
+  {n:"Joe Pyle Auctions",    s:"https://bid.joerpyleauctions.com/ui/items?query={K}"},
+  {n:"Mass Art Auctioneers", s:"https://bid.massartauctioneers.com/ui/items?query={K}"},
+  {n:"Mountain Valley",      s:"https://bid.mountainvalleyauctions.com/ui/items?query={K}"},
+  {n:"Hansen Auction Group", s:"https://bid.hansenauctiongroup.com/ui/items?query={K}"},
+  {n:"Wiregrass Auction",    s:"https://bid.wiregrassauctiongroup.com/ui/items?query={K}"},
+  {n:"Alderfer Auction",     s:"https://bid.alderferauction.com/ui/items?query={K}"},
+  {n:"Alaska Premier",       s:"https://bid.alaskapremierauctions.com/ui/items?query={K}"},
+  {n:"Geyer Auctions",       s:"https://bid.geyerauctions.com/ui/items?query={K}"},
+  {n:"Walnut Hill Auctions", s:"https://bid.walnuthillauctions.com/ui/items?query={K}"},
+  {n:"Swicegood Group",      s:"https://bid.theswicegoodgroup.com/ui/items?query={K}"},
+  {n:"Cabin Fever Auctions", s:"https://cabinfeverauctions.bidwrangler.com/ui/items?query={K}"},
+  {n:"PA Auction Center",    s:"https://bid.paauctioncenter.com/ui/items?query={K}"},
+];
+
+var blockedQueue = [];
+
+function buildUrl(site, kw) {
+  return site.s.replace(/{K}/g, encodeURIComponent(kw));
+}
+
+function openLink(url, btn) {
+  var w = window.open(url, '_blank');
+  if (!w || w.closed || typeof w.closed === 'undefined') {
+    blockedQueue.push({url: url, btn: btn});
+    document.getElementById('popupNotice').classList.add('show');
+  } else {
+    btn.classList.add('opened');
+    btn.textContent = 'Opened ✓';
+  }
+}
+
+function retryBlocked() {
+  blockedQueue.forEach(function(item) {
+    var w = window.open(item.url, '_blank');
+    if (w) { item.btn.classList.add('opened'); item.btn.textContent = 'Opened ✓'; }
+  });
+  blockedQueue = [];
+  document.getElementById('popupNotice').classList.remove('show');
+}
+
+function runSearch() {
+  var kw = document.getElementById('searchInput').value.trim();
+  if (!kw) return;
+
+  document.getElementById('popupNotice').classList.remove('show');
+  blockedQueue = [];
+
+  var area = document.getElementById('resultsArea');
+  var html = '<div class="results-meta"><h2>RESULTS — "' + kw.toUpperCase() + '"</h2><span class="results-count">' + SITES.length + ' sites ready</span></div>';
+
+  SITES.forEach(function(site) {
+    var url = buildUrl(site, kw);
+    html += '<div class="site-block">';
+    html += '<div class="site-block-head"><span class="dot"></span>' + site.n + '</div>';
+    html += '<div class="result-row">';
+    html += '<div class="result-info"><div class="result-kw">' + kw + '</div><div class="result-desc">View live search results on ' + site.n + '</div></div>';
+    html += '<a class="view-btn" href="' + url + '" target="_blank" onclick="markOpened(this)">View Results →</a>';
+    html += '</div></div>';
+  });
+
+  area.innerHTML = html;
+}
+
+function markOpened(el) {
+  el.classList.add('opened');
+}
+</script>
+{% endblock %}

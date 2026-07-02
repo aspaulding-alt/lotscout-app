@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}The Lot Scout{% endblock %}</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1e2535;
+    --navy2: #262e42;
+    --navy3: #2e3850;
+    --tan: #c9a87a;
+    --tan2: #e0c79f;
+    --bg: #e8e4de;
+    --ink: #2c2c2c;
+    --muted: #6b6b63;
+    --line: #d4cfc8;
+    --card: #ffffff;
+    --green: #2a6b3c;
+    --red: #c0504d;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--ink); font-family: Georgia, serif; font-size: 16px; line-height: 1.6; }
+
+  nav {
+    background: var(--navy);
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-brand {
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+  }
+  .nav-the { font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 3px; color: var(--tan); line-height: 1; }
+  .nav-logo { font-family: 'Cinzel', serif; font-size: 17px; color: var(--tan2); letter-spacing: 2px; font-weight: 600; }
+  .nav-links { display: flex; align-items: center; gap: 20px; list-style: none; }
+  .nav-links a {
+    color: #a0aabf;
+    text-decoration: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: .5px;
+    transition: color .15s;
+  }
+  .nav-links a:hover { color: var(--tan2); }
+  .nav-btn {
+    background: var(--tan);
+    color: var(--navy) !important;
+    padding: 8px 18px;
+    font-family: 'Cinzel', serif !important;
+    font-size: 12px !important;
+    letter-spacing: 1px !important;
+    font-weight: 600 !important;
+    transition: background .15s;
+  }
+  .nav-btn:hover { background: var(--tan2) !important; }
+  .nav-tier {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--tan);
+    border: 1px solid var(--tan);
+    padding: 3px 8px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .flash {
+    padding: 12px 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    text-align: center;
+  }
+  .flash.error { background: #f8d7da; color: #721c24; border-bottom: 1px solid #f5c6cb; }
+  .flash.success { background: #d4edda; color: #155724; border-bottom: 1px solid #c3e6cb; }
+
+  footer {
+    background: var(--navy2);
+    padding: 28px 40px;
+    text-align: center;
+    border-top: 1px solid rgba(201,168,122,0.15);
+    margin-top: 60px;
+  }
+  .footer-links { display: flex; justify-content: center; gap: 20px; list-style: none; margin-bottom: 10px; flex-wrap: wrap; }
+  .footer-links a { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #5a6480; text-decoration: none; }
+  .footer-links a:hover { color: var(--tan2); }
+  .footer-copy { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #3a4258; }
+
+  @media (max-width: 640px) {
+    nav { padding: 0 16px; }
+    .nav-links .hide-mobile { display: none; }
+  }
+</style>
+{% block head %}{% endblock %}
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="/">
+    <span class="nav-the">The</span>
+    <span class="nav-logo">Lot Scout</span>
+  </a>
+  <ul class="nav-links">
+    {% if session.get('user_id') %}
+      <li><span class="nav-tier">{{ session.get('tier', 'starter').upper() }}</span></li>
+      <li class="hide-mobile"><a href="/dashboard">Dashboard</a></li>
+      {% if session.get('tier') == 'pro' %}
+        <li class="hide-mobile"><a href="/hunter">Lot Hunter</a></li>
+      {% endif %}
+      <li><a href="/logout">Sign Out</a></li>
+    {% else %}
+      <li class="hide-mobile"><a href="/#how">How It Works</a></li>
+      <li class="hide-mobile"><a href="/#pricing">Pricing</a></li>
+      <li><a href="/login">Sign In</a></li>
+      <li><a href="/signup?tier=pro" class="nav-btn">Start Free Trial</a></li>
+    {% endif %}
+  </ul>
+</nav>
+
+{% block content %}{% endblock %}
+
+<footer>
+  <ul class="footer-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/#pricing">Pricing</a></li>
+    <li><a href="/privacy">Privacy Policy</a></li>
+    <li><a href="/terms">Terms of Service</a></li>
+  </ul>
+  <div class="footer-copy">© 2026 The Lot Scout · thelotscout.com · All rights reserved</div>
+</footer>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>
