@@ -38,10 +38,27 @@ init_db()
 
 # ─── BROAD KEYWORD BLOCK LIST ─────────────────────────────────────────────────
 BLOCKED_KEYWORDS = [
-    "baseball cards", "football cards", "basketball cards", "hockey cards",
-    "pokemon", "pokemon cards", "trading cards", "sports cards",
-    "coins", "stamps", "jewelry", "furniture", "antiques",
-    "vintage", "collectibles", "toys", "books", "records", "vinyl"
+    "baseball", "baseball card", "baseball cards",
+    "football", "football card", "football cards",
+    "basketball", "basketball card", "basketball cards",
+    "hockey", "hockey card", "hockey cards",
+    "pokemon", "pokemon card", "pokemon cards",
+    "trading card", "trading cards", "sports card", "sports cards",
+    "card", "cards",
+    "coin", "coins",
+    "stamp", "stamps",
+    "jewelry", "jewellery", "jewel", "jewels",
+    "furniture",
+    "antique", "antiques",
+    "vintage",
+    "collectible", "collectibles",
+    "toy", "toys",
+    "book", "books",
+    "record", "records", "vinyl", "vinyls",
+    "comic", "comics",
+    "doll", "dolls", "figurine", "figurines",
+    "game", "games", "video game", "video games",
+    "knife", "knives",
 ]
 
 # ─── TIER LIMITS ──────────────────────────────────────────────────────────────
